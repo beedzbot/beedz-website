@@ -94,6 +94,8 @@ code{font-family:ui-monospace,monospace;font-size:13px;color:var(--teal-glow);ba
 .bt{background:rgba(100,149,237,0.12);color:#7ba7f0}
 .bw{background:rgba(46,204,113,0.12);color:#2ecc71}
 .bb{background:rgba(244,127,255,0.12);color:#f47bff}
+.bv{background:rgba(90,172,186,0.12);color:#5aacba}
+.bmu{background:rgba(255,165,0,0.12);color:#ffa500}
 .cdesc{font-size:13px;color:var(--text-muted);line-height:1.55;margin-bottom:10px}
 .cusage{font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:6px;margin-bottom:8px}
 .plan-row{display:flex;gap:5px;flex-wrap:wrap}
@@ -343,6 +345,9 @@ code{font-family:ui-monospace,monospace;font-size:13px;color:var(--teal-glow);ba
       <button class="filter" onclick="filt('prefix',this)">Prefix</button>
       <button class="filter" onclick="filt('tickets',this)">Tickets</button>
       <button class="filter" onclick="filt('welcome',this)">Welcome &amp; Boosts</button>
+      <button class="filter" onclick="filt('voice',this)">Voice</button>
+      <button class="filter" onclick="filt('music',this)">Music</button>
+      <button class="filter" onclick="filt('utility',this)">Utility</button>
     </div>
     <div class="grid">
       <!-- GENERAL -->
@@ -389,6 +394,20 @@ code{font-family:ui-monospace,monospace;font-size:13px;color:var(--teal-glow);ba
       <!-- BOOSTER -->
       <div class="card" data-cat="welcome"><div class="ctop"><span class="cname">/set-booster-channel</span><span class="badge bb">Boosts</span></div><p class="cdesc">Set the channel where Beedz sends a thank-you message and pings whoever boosted the server.</p><div class="cusage">Usage: /set-booster-channel #channel</div><div class="plan-row"><span class="plan-tag premium">Premium</span></div></div>
       <div class="card" data-cat="welcome"><div class="ctop"><span class="cname">/test-boost</span><span class="badge bb">Boosts</span></div><p class="cdesc">Sends a test boost message to the configured channel so you can preview how it looks.</p><div class="cusage">Usage: /test-boost</div><div class="plan-row"><span class="plan-tag premium">Premium</span></div></div>
+      <!-- UTILITY -->
+      <div class="card" data-cat="utility"><div class="ctop"><span class="cname">/embed</span><span class="badge bg">Utility</span></div><p class="cdesc">Opens a form to create a fully custom embed message — set the title, description, colour, footer and image.</p><div class="cusage">Usage: /embed</div><div class="plan-row"><span class="plan-tag basic">Basic</span><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <!-- VOICE -->
+      <div class="card" data-cat="voice"><div class="ctop"><span class="cname">/create-voice</span><span class="badge bv">Voice</span></div><p class="cdesc">Creates a "Join to Create" voice channel. When members join it they get their own private VC with a 4 person limit.</p><div class="cusage">Usage: /create-voice [category?]</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="voice"><div class="ctop"><span class="cname">/vc-panel</span><span class="badge bv">Voice</span></div><p class="cdesc">Opens the VC control panel with buttons to lock, unlock, ghost, reveal, claim, disconnect members, view info, and adjust the user limit.</p><div class="cusage">Usage: /vc-panel</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <!-- MUSIC -->
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/play</span><span class="badge bmu">Music</span></div><p class="cdesc">Play a song in your voice channel by name or YouTube URL. Automatically queues if something is already playing.</p><div class="cusage">Usage: /play &lt;song name or URL&gt;</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/skip</span><span class="badge bmu">Music</span></div><p class="cdesc">Skips the currently playing song and moves to the next in the queue.</p><div class="cusage">Usage: /skip</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/stop</span><span class="badge bmu">Music</span></div><p class="cdesc">Stops the music, clears the queue, and disconnects the bot from the voice channel.</p><div class="cusage">Usage: /stop</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/pause</span><span class="badge bmu">Music</span></div><p class="cdesc">Pauses the currently playing track.</p><div class="cusage">Usage: /pause</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/resume</span><span class="badge bmu">Music</span></div><p class="cdesc">Resumes a paused track from where it left off.</p><div class="cusage">Usage: /resume</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/queue</span><span class="badge bmu">Music</span></div><p class="cdesc">Shows the current music queue with track names and positions.</p><div class="cusage">Usage: /queue</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/volume</span><span class="badge bmu">Music</span></div><p class="cdesc">Sets the playback volume from 1 to 100.</p><div class="cusage">Usage: /volume &lt;1-100&gt;</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
+      <div class="card" data-cat="music"><div class="ctop"><span class="cname">/nowplaying</span><span class="badge bmu">Music</span></div><p class="cdesc">Shows the currently playing track.</p><div class="cusage">Usage: /nowplaying</div><div class="plan-row"><span class="plan-tag pro">Pro</span><span class="plan-tag premium">Premium</span></div></div>
     </div>
   </section>
 
@@ -579,4 +598,4 @@ function completePurchase(){
 document.getElementById('payModal').addEventListener('click',function(e){if(e.target===this)closeModal()})
 </script>
 </body>
-</html>
+  </html>
