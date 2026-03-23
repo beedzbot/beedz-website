@@ -801,108 +801,142 @@ code{font-family:ui-monospace,monospace;font-size:13px;color:var(--teal-glow);ba
   const logo = document.getElementById('logo-3d');
   const flare = document.getElementById('lens-flare');
   const loaderText = document.getElementById('loader-text');
+  const loader = document.getElementById('loader');
   let W, H, stars=[], speed=0.3, animId, startTime=Date.now();
+
+  // Create explosion overlay elements
+  const flashEl = document.createElement('div');
+  flashEl.style.cssText='position:absolute;inset:0;z-index:10;background:#fff;opacity:0;pointer-events:none;transition:none';
+  loader.appendChild(flashEl);
+
+  const beedztitle = document.createElement('div');
+  beedztitle.textContent='BEEDZ';
+  beedztitle.style.cssText='position:absolute;z-index:11;left:50%;top:50%;transform:translate(-50%,-50%);font-family:system-ui,sans-serif;font-size:clamp(48px,12vw,120px);font-weight:900;letter-spacing:-4px;color:#0d2b2e;opacity:0;pointer-events:none;transition:none;white-space:nowrap';
+  loader.appendChild(beedztitle);
 
   function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
   resize();
   window.addEventListener('resize',resize);
 
-  // Create stars with depth
   for(let i=0;i<500;i++){
-    stars.push({x:(Math.random()-0.5)*2,y:(Math.random()-0.5)*2,z:Math.random(),trail:0});
+    stars.push({x:(Math.random()-0.5)*2,y:(Math.random()-0.5)*2,z:Math.random()});
   }
 
-  function easeIn(t){return t*t*t;}
   function lerp(a,b,t){return a+(b-a)*t;}
+  function easeIn(t){return t*t*t;}
+  function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
 
-  // Timeline (ms)
-  // 0-800: slow warp accelerating
-  // 800-1800: fast warp, logo starts far away tumbling
-  // 1800-2800: logo flies toward camera, rotates, glows
-  // 2800-3200: logo huge, flies PAST camera, lens flare
-  // 3200-3600: text fades in
-  // 3800: reveal site
+  // TIMELINE
+  // 0–900:    slow warp, accelerating
+  // 900–2200: fast warp with trails, logo tumbles in from distance
+  // 2200–3000: logo slows, centers, glows massively
+  // 3000–3200: EXPLOSION — white flash fills screen
+  // 3200–3600: "BEEDZ" appears on white, large and bold
+  // 3600–4000: white + text fades out revealing the site underneath
+  // 4000:     site shown
+
+  let exploded = false;
+  let phase = 0; // 0=warp, 1=flash, 2=title, 3=fadeout, 4=done
 
   function draw(){
-    const now=Date.now()-startTime;
-    ctx.fillStyle='rgba(0,0,0,0.85)';
-    ctx.fillRect(0,0,W,H);
-    const cx=W/2, cy=H/2;
+    const now = Date.now() - startTime;
 
-    // Speed curve
-    if(now<800) speed=lerp(0.3,3,now/800);
-    else if(now<2800) speed=lerp(3,8,Math.min((now-800)/2000,1));
-    else if(now>2800) speed=lerp(8,0.5,Math.min((now-2800)/600,1));
+    // ── WARP PHASE ──
+    if(now < 3000){
+      ctx.fillStyle = 'rgba(0,0,0,0.82)';
+      ctx.fillRect(0,0,W,H);
+      const cx=W/2, cy=H/2;
 
-    stars.forEach(s=>{
-      const prevZ=s.z;
-      s.z-=speed*0.006;
-      if(s.z<=0.001){s.x=(Math.random()-0.5)*2;s.y=(Math.random()-0.5)*2;s.z=1;}
-      const sx=s.x/s.z*W+cx;
-      const sy=s.y/s.z*H+cy;
-      const r=Math.max(0.3,(1-s.z)*3.5);
-      const opacity=Math.min(1,(1-s.z)*1.2);
-      // Draw star trail when fast
-      if(speed>2){
-        const psx=s.x/prevZ*W+cx;
-        const psy=s.y/prevZ*H+cy;
-        ctx.beginPath();
-        ctx.moveTo(psx,psy);
-        ctx.lineTo(sx,sy);
-        ctx.strokeStyle=`rgba(126,207,221,${opacity*0.6})`;
-        ctx.lineWidth=r*0.8;
-        ctx.stroke();
+      if(now<900) speed=lerp(0.3,4,now/900);
+      else if(now<2200) speed=lerp(4,10,clamp((now-900)/1300,0,1));
+      else speed=lerp(10,1,clamp((now-2200)/800,0,1));
+
+      stars.forEach(s=>{
+        const prevZ=s.z;
+        s.z -= speed*0.006;
+        if(s.z<=0.001){s.x=(Math.random()-0.5)*2;s.y=(Math.random()-0.5)*2;s.z=1;}
+        const sx=s.x/s.z*W+cx, sy=s.y/s.z*H+cy;
+        const r=Math.max(0.3,(1-s.z)*3.5);
+        const op=Math.min(1,(1-s.z)*1.2);
+        if(speed>2){
+          const psx=s.x/prevZ*W+cx, psy=s.y/prevZ*H+cy;
+          ctx.beginPath(); ctx.moveTo(psx,psy); ctx.lineTo(sx,sy);
+          ctx.strokeStyle=`rgba(126,207,221,${op*0.5})`; ctx.lineWidth=r*0.7; ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(200,238,245,${op})`; ctx.fill();
+      });
+
+      // Logo comes from distance
+      if(now > 800){
+        const t = clamp((now-800)/2200, 0, 1);
+        const scale = lerp(0.05, 3.5, easeIn(t));
+        const rotate = lerp(-40, 5, t);
+        const tx = lerp(W*0.25, 0, clamp(t*1.8,0,1));
+        const ty = lerp(-H*0.15, 0, clamp(t*1.8,0,1));
+        const op = Math.min(1, (now-800)/500);
+        const glow = Math.min(scale*25, 140);
+        logo.style.transform=`translate(calc(-50% + ${tx}px),calc(-50% + ${ty}px)) scale(${scale}) rotate(${rotate}deg)`;
+        logo.style.opacity=op;
+        logo.style.filter=`drop-shadow(0 0 ${glow}px rgba(90,172,186,0.95))`;
       }
-      ctx.beginPath();
-      ctx.arc(sx,sy,r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,238,245,${opacity})`;
-      ctx.fill();
-    });
 
-    // Logo animation
-    if(now>800 && now<3400){
-      const t=Math.min((now-800)/2600,1);
-      // Logo comes from far away (small) and gets bigger
-      const scale=lerp(0.05,now<2800?2.5:12,now<2800?easeIn(t):(t));
-      const rotate=lerp(360,now<2800?15:0,t);
-      const tx=lerp(W*0.3,0,Math.min(t*1.5,1));
-      const ty=lerp(-H*0.2,0,Math.min(t*1.5,1));
-      const opacity=now>3100?Math.max(0,1-(now-3100)/300):Math.min(1,(now-800)/400);
-      logo.style.transform=`translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${scale}) rotate(${rotate}deg)`;
-      logo.style.opacity=opacity;
-      // Glow intensifies as it approaches
-      const glowSize=Math.min(scale*20,120);
-      logo.style.filter=`drop-shadow(0 0 ${glowSize}px rgba(90,172,186,${Math.min(opacity,0.9)}))`;
+      // Lens flare build up before explosion
+      if(now > 2600){
+        const t = clamp((now-2600)/400,0,1);
+        const fs = lerp(0, 5, t);
+        flare.style.transform=`translate(-50%,-50%) scale(${fs})`;
+        flare.style.opacity=lerp(0,1,t);
+      }
     }
 
-    // Lens flare at peak approach
-    if(now>2600 && now<3000){
-      const t=(now-2600)/400;
-      const fscale=lerp(0,3,Math.sin(t*Math.PI));
-      const fopacity=Math.sin(t*Math.PI)*0.9;
-      flare.style.transform=`translate(-50%,-50%) scale(${fscale})`;
-      flare.style.opacity=fopacity;
-    } else {
+    // ── EXPLOSION FLASH ──
+    if(now >= 3000 && !exploded){
+      exploded = true;
+      cancelAnimationFrame(animId);
+      logo.style.opacity=0;
       flare.style.opacity=0;
+      loaderText.style.opacity=0;
+
+      // White flash
+      flashEl.style.transition='none';
+      flashEl.style.opacity=1;
+
+      // "BEEDZ" appears instantly on white
+      setTimeout(()=>{
+        beedztitle.style.transition='none';
+        beedztitle.style.opacity=1;
+        beedztitle.style.transform='translate(-50%,-50%) scale(1)';
+      }, 80);
+
+      // Scale BEEDZ up slightly for drama
+      setTimeout(()=>{
+        beedztitle.style.transition='transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease';
+        beedztitle.style.transform='translate(-50%,-50%) scale(1.05)';
+      }, 150);
+
+      // Fade out white + BEEDZ
+      setTimeout(()=>{
+        flashEl.style.transition='opacity 0.7s ease';
+        flashEl.style.opacity=0;
+        beedztitle.style.transition='opacity 0.7s ease, transform 0.7s ease';
+        beedztitle.style.opacity=0;
+        beedztitle.style.transform='translate(-50%,-50%) scale(1.15)';
+      }, 700);
+
+      // Reveal site
+      setTimeout(()=>{
+        loader.classList.add('hide');
+        document.getElementById('site').classList.add('show');
+      }, 1400);
+
+      return;
     }
 
-    // Text
-    if(now>3200 && now<3800){
-      loaderText.style.opacity=Math.min(1,(now-3200)/400);
-    }
-
-    if(now<3800) animId=requestAnimationFrame(draw);
+    if(now < 3000) animId = requestAnimationFrame(draw);
   }
-  draw();
 
-  setTimeout(function(){
-    cancelAnimationFrame(animId);
-    logo.style.transition='all 0.6s ease';
-    logo.style.opacity=0;
-    loaderText.style.opacity=0;
-    document.getElementById('loader').classList.add('hide');
-    document.getElementById('site').classList.add('show');
-  },4200);
+  draw();
 })();
 
 // ── MOBILE SIDEBAR ──
@@ -1083,4 +1117,4 @@ function mockLogin(){
 }
 </script>
 </body>
-          </html>
+      </html>
